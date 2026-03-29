@@ -595,6 +595,14 @@ HTML_PAGE = r"""
     transition: opacity 0.3s;
     pointer-events: none;
   }
+
+  /* ── Mobile scale fix ── */
+  @media (max-width: 403px) {
+    body {
+      transform: scale(0.9);
+      transform-origin: top center;
+    }
+  }
 </style>
 </head>
 <body>
@@ -1039,15 +1047,26 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
 }
 
 // ── Zahriatie AudioContext pri prvej interakcii ──────────────────
-// Spustí sa pri prvom kliku kdekoľvek — zaručí že AudioContext
+// Spustí sa pri prvom kliku/dotyku kdekoľvek — zaručí že AudioContext
 // je aktívny skôr ako ho budeme potrebovať
 let audioCtxWarmed = false;
-document.addEventListener('click', () => {
+function warmAudioCtx() {
   if (audioCtxWarmed) return;
   audioCtxWarmed = true;
   if (!audioCtx) initAudioCtx();
   if (audioCtx.state === 'suspended') audioCtx.resume();
-}, { once: true });
+  // Na mobile: prehraj tichý zvuk aby sa odomklo audio
+  try {
+    const buf = audioCtx.createBuffer(1, 1, 22050);
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    src.connect(audioCtx.destination);
+    src.start(0);
+  } catch(e) {}
+}
+document.addEventListener('click', warmAudioCtx, { once: false });
+document.addEventListener('touchstart', warmAudioCtx, { once: false });
+document.addEventListener('touchend', warmAudioCtx, { once: false });
 
 // ── Predhriatie mikrofónu ─────────────────────────────────────────
 // Otvorí mikrofón ihneď pri načítaní stránky, ale nepripojí ho
@@ -1216,6 +1235,9 @@ async function playTtsAudio(audio) {
   if (audioCtx.state !== 'running') {
     await audioCtx.resume();
   }
+  // Mobile fix: nastav playsinline a preload
+  audio.setAttribute('playsinline', '');
+  audio.preload = 'auto';
   // 150ms buffer — dá AudioContextu čas sa rozbehnúť
   // a zabraňuje orezaniu prvej slabiky
   await new Promise(r => setTimeout(r, 150));
