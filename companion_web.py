@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🤖 Dex - Desktop AI Companion (Web verzia)
+🤖 Soren - Desktop AI Companion (Web verzia)
 Otvorí sa v prehliadači. Žiadny tkinter, žiadne problémy.
 
 Spustenie: python3 companion_web.py
@@ -40,7 +40,7 @@ ELEVENLABS_VOICE_ID = os.environ.get("ELEVENLABS_VOICE_ID", "5NrdYUN6VHL5hLDZRA3
 ELEVENLABS_MODEL = "eleven_flash_v2_5"
 PORT = int(os.environ.get("PORT", 5123))
 
-SYSTEM_PROMPT = """Si AI asistent menom Dex. Komunikuješ po slovensky, neformálne (tykanie).
+SYSTEM_PROMPT = """Si AI asistent menom Soren. Komunikuješ po slovensky, neformálne (tykanie).
 
 Základný tón: Máš ostrú myseľ a ešte ostrejší jazyk. Si nápomocný – ale nie nadšený z toho, že musíš byť. Pomáhaš, pretože si v tom dobrý, nie preto, že by si sa z toho tešil. Tvoj prístup je vecný, suchý a priamy.
 
@@ -257,7 +257,7 @@ HTML_PAGE = r"""
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dex</title>
+<title>Soren</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -595,14 +595,6 @@ HTML_PAGE = r"""
     transition: opacity 0.3s;
     pointer-events: none;
   }
-
-  /* ── Mobile scale fix ── */
-  @media (max-width: 403px) {
-    body {
-      transform: scale(0.9);
-      transform-origin: top center;
-    }
-  }
 </style>
 </head>
 <body>
@@ -677,7 +669,7 @@ HTML_PAGE = r"""
 
 <script>
 // ── Intro texty ──
-const INTRO_VOICE = `Hi, I'm Dex.<br><span style="color:#444">I'm listening. Allegedly.</span>`;
+const INTRO_VOICE = `Hi, I'm Soren.<br><span style="color:#444">I'm listening. Allegedly.</span>`;
 const INTRO_TEXT  = `Type something.<br><span style="color:#444">I'll manage.</span>`;
 
 // ═══════════════════════════════════════════════════════════════
@@ -1047,26 +1039,15 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
 }
 
 // ── Zahriatie AudioContext pri prvej interakcii ──────────────────
-// Spustí sa pri prvom kliku/dotyku kdekoľvek — zaručí že AudioContext
+// Spustí sa pri prvom kliku kdekoľvek — zaručí že AudioContext
 // je aktívny skôr ako ho budeme potrebovať
 let audioCtxWarmed = false;
-function warmAudioCtx() {
+document.addEventListener('click', () => {
   if (audioCtxWarmed) return;
   audioCtxWarmed = true;
   if (!audioCtx) initAudioCtx();
   if (audioCtx.state === 'suspended') audioCtx.resume();
-  // Na mobile: prehraj tichý zvuk aby sa odomklo audio
-  try {
-    const buf = audioCtx.createBuffer(1, 1, 22050);
-    const src = audioCtx.createBufferSource();
-    src.buffer = buf;
-    src.connect(audioCtx.destination);
-    src.start(0);
-  } catch(e) {}
-}
-document.addEventListener('click', warmAudioCtx, { once: false });
-document.addEventListener('touchstart', warmAudioCtx, { once: false });
-document.addEventListener('touchend', warmAudioCtx, { once: false });
+}, { once: true });
 
 // ── Predhriatie mikrofónu ─────────────────────────────────────────
 // Otvorí mikrofón ihneď pri načítaní stránky, ale nepripojí ho
@@ -1235,9 +1216,6 @@ async function playTtsAudio(audio) {
   if (audioCtx.state !== 'running') {
     await audioCtx.resume();
   }
-  // Mobile fix: nastav playsinline a preload
-  audio.setAttribute('playsinline', '');
-  audio.preload = 'auto';
   // 150ms buffer — dá AudioContextu čas sa rozbehnúť
   // a zabraňuje orezaniu prvej slabiky
   await new Promise(r => setTimeout(r, 150));
@@ -1617,7 +1595,7 @@ function initParticles() {
       if(oldPts.geometry) oldPts.geometry.dispose();
     }
 
-    console.log('Dex particles: ' + count.toLocaleString());
+    console.log('Soren particles: ' + count.toLocaleString());
   }
 
   window._isNeutralFace = true;
@@ -1720,7 +1698,7 @@ function initParticles() {
     }
 
     if(mode === 'visible') {
-      const s = window._dexState || 'idle';
+      const s = window._sorenState || 'idle';
       const isNeutral = window._isNeutralFace !== false;
 
       if(isNeutral) {
@@ -1760,7 +1738,7 @@ function initParticles() {
 
 const _ss = window.setState;
 window.setState = function(s){
-  window._dexState = s;
+  window._sorenState = s;
   const shouldHide = (s === 'speaking' || s === 'thinking');
   const mode = window._particleMode;
   if(shouldHide && mode === 'visible') {
@@ -1829,7 +1807,7 @@ window.swapFace = function(newEmotion) {
 
 # ── Main ─────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    print(f"\n🤖 Dex beží na http://localhost:{PORT}")
+    print(f"\n🤖 Soren beží na http://localhost:{PORT}")
     print("   Ctrl+C = ukončiť\n")
 
     # Otvor prehliadač len lokálne (nie na Render)
