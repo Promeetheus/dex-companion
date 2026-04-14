@@ -348,6 +348,7 @@ HTML_PAGE = r"""
     height: 365px;
     z-index: 1;
     display: block;
+    opacity: 0.9;
   }
 
   /* ── Wave canvas ── */
